@@ -3,9 +3,44 @@ let i = 0;
 const lowStockThreshold = 10; //arbitrary threshold for low stock
 let controlsDiv = document.getElementById("controls");
 
+let UIhelper = 
+{
+    controlsDivclear: function()
+    {
+        if (controlsDiv.children.length > 0) 
+        {
+            reset();
+        }
+    },
+
+    errorChecking: function(...args)
+    {
+        for (let i = 0; i < args.length; i++) {
+            if (!args[i]) 
+            {
+                return true;
+            }
+        }
+        return false;
+    },
+}
+
+let product =
+{
+    name: "",
+    code: "",
+    quantity: 0,
+    category: "",
+    lowStockAlert: function()
+    {
+        alert("Low stock for item: " + this.name);
+    }
+}
+
 function sort(sortField, ascending = true)
 {
-    item.sort((a, b) => {
+    item.sort((a, b) => 
+        {
             let valA = a[sortField];
             let valB = b[sortField];
 
@@ -30,7 +65,8 @@ function sort(sortField, ascending = true)
         displayInventory(item);
 }
 
-function addToInventory() {
+function addToInventory() 
+{
     if (document.getElementById("item").value === "" || 
         document.getElementById("itemCode").value === "" || 
         document.getElementById("quantity").value === "") 
@@ -39,205 +75,235 @@ function addToInventory() {
         return;
     }
 
-    item[i] = {
-        name: document.getElementById("item").value,
-        code: document.getElementById("itemCode").value,
-        quantity: document.getElementById("quantity").value,
-        category: document.getElementById("category").value,
-    };
+    let name = document.getElementById("item").value;
+    let code = document.getElementById("itemCode").value;
+    let quantity = parseInt(document.getElementById("quantity").value);
+    let category = document.getElementById("category").value;
+
+    let newProduct = Object.assign({}, product); // clone structure
+    newProduct.name = name;
+    newProduct.code = code;
+    newProduct.quantity = quantity;
+    newProduct.category = category;
+
+    item[i] = newProduct
     i++;
     console.log(item[i-1]);
     displayInventory(item);
 }
 
-function filter() {
+function editItem()
+{
     let uniqueField = document.getElementById("uniqueField");
-    let searchButton = document.getElementById("searchButton");
+    let searchButtonEdit = document.getElementById("searchButtonEdit");
 
-    let filterBy = document.getElementById("filterBy");
+    UIhelper.controlsDivclear();
 
-    if (!uniqueField || !searchButton || !filterBy) {
+    let errorCheck = UIhelper.errorChecking(uniqueField, searchButtonEdit);
+
+    if (errorCheck) 
+    {
         // Prevents creation of additional search inputs
         uniqueField = document.createElement("input");
         uniqueField.id = "uniqueField";
         uniqueField.type = "text";
         uniqueField.placeholder = "Enter unique field to update (case-sensitive)";
 
-        searchButton = document.createElement("button");
-        searchButton.id = "searchButton";
-        searchButton.textContent = "Find Record";
+        searchButtonEdit = document.createElement("button");
+        searchButtonEdit.id = "searchButtonEdit";
+        searchButtonEdit.textContent = "Find Record";
 
-        filterBy = document.createElement("select");
-        filterBy.id = "filterBy";
-        
-        let categories = new Set();
-        let lowStockOption = document.createElement("option");
-        lowStockOption.value = "lowStock";
-        lowStockOption.text = "Low Stock Items";
-        filterBy.appendChild(lowStockOption);
-        item.forEach((item) => {
-            if (item.category && !categories.has(item.category)) {
-                let option = document.createElement("option");
-                option.value = item.category;
-                option.text = item.category;
-                filterBy.appendChild(option);
-                categories.add(item.category);
-            }
-        });
-
-        filterBy.addEventListener("change", function () {
-        let selected = filterBy.value;
-        let filteredItems;
-
-        if (selected === "lowStock") {
-            filteredItems = item.filter(it => it.quantity < lowStockThreshold);
-        } else {
-            filteredItems = item.filter(it => it.category === selected);
-        }
-
-        displayInventory(filteredItems);
-        });
-
-        controlsDiv.appendChild(filterBy);
         controlsDiv.appendChild(uniqueField);
-        controlsDiv.appendChild(searchButton);
+        controlsDiv.appendChild(searchButtonEdit);
+    }
 
-        searchButton.onclick = function () {
+    searchButtonEdit.onclick = function ()
+    {
         let searchCode = uniqueField.value;
-        let itemToUpdate = item.find(it => it.name === searchCode || it.code === searchCode);
+        let itemToEdit = item.find(it => it.name === searchCode || it.code === searchCode);
 
-        if (itemToUpdate)
+        if (itemToEdit)
         {
             // Dropdown to pick which field to update
             let selection = document.createElement("select");
             selection.id = "fieldSelection";
 
             let fields = ["name", "code", "quantity", "category"];
-            fields.forEach(field => {
+            fields.forEach(field => 
+            {
                 let option = document.createElement("option");
                 option.value = field;
-                option.text = "Update " + field;
+                option.text = field.charAt(0).toUpperCase() + field.slice(1);
                 selection.appendChild(option);
             });
+
             controlsDiv.appendChild(selection);
-            
-            let newValue = document.getElementById("newValue");
-            let confirmButton = document.getElementById("confirmButton");
 
-            selection.addEventListener("change", function() 
+            // Input field for new value
+            let newValueInput = document.createElement("input");
+            newValueInput.id = "newValue";
+            newValueInput.type = "text";
+            newValueInput.placeholder = "Enter new value";
+            controlsDiv.appendChild(newValueInput);
+
+            // Update button
+            let updateButton = document.createElement("button");
+            updateButton.textContent =  "Update Item";
+            controlsDiv.appendChild(updateButton);
+
+            updateButton.onclick = function ()
             {
-                if (!document.getElementById("newValue") || !document.getElementById("confirmButton")) {
-            // Input for new value
-                    newValue = document.createElement("input");
-                    newValue.type = "text";
-                    newValue.id = "newValue";
-                    newValue.placeholder = "Enter new value";
-                    controlsDiv.appendChild(newValue);
+                let selectedField = selection.value;
+                let newValue = newValueInput.value;
 
-            // Confirm button
-            confirmButton = document.createElement("button");
-            confirmButton.id = "confirmButton";
-            confirmButton.textContent = "Confirm Update";
-            controlsDiv.appendChild(confirmButton);
-
-            confirmButton.onclick = function () {
-                let field = selection.value;
-                let val = newValue.value;
-
-                if (val) {
-                    if (field === "quantity") {
-                        val = parseInt(val); // Convert to integer if updating quantity
-                    }
-                    itemToUpdate[field] = val; // Only update the chosen field
-                    displayInventory(item);
+                if (newValue === "") 
+                {
+                    alert("Please enter a new value.");
+                    return;
                 }
-                }  
+
+                itemToEdit[selectedField] = newValue;
+                displayInventory(item);
             };
-            });
-            } else {
-            alert("No record found with code: " + searchCode);
         }
-        };
-
-
-    } else {
-        document.getElementById("uniqueField").remove();
-        document.getElementById("searchButton").remove();
-        if (document.getElementById("filterBy") || document.getElementById("newValue") || document.getElementById("confirmButton") || document.getElementById("fieldSelection"))
+        else
         {
-            document.getElementById("filterBy").remove();
-            document.getElementById("newValue").remove();
-            document.getElementById("confirmButton").remove();
-            document.getElementById("fieldSelection").remove();
+            alert("Item not found.");
         }
-    }
+    };
+}
+
+function filter() 
+{
+    let filterBy = document.getElementById("filterBy");
+
+    UIhelper.controlsDivclear();
+
+    let errorCheck = UIhelper.errorChecking(filterBy);
+
+    if (errorCheck) 
+    {
+        // Prevents creation of additional search inputs
+        filterBy = document.createElement("select");
+        filterBy.id = "filterBy";
     
+        let categories = new Set();
+        let defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        defaultOption.text = "Select a category";
+        filterBy.appendChild(defaultOption);
+
+        let lowStockOption = document.createElement("option");
+        lowStockOption.value = "lowStock";
+        lowStockOption.text = "Low Stock Items";
+        filterBy.appendChild(lowStockOption);
+        item.forEach((item) => 
+            {
+                if (item.category && !categories.has(item.category))
+                {
+                    let option = document.createElement("option");
+                    option.value = item.category;
+                    option.text = item.category;
+                    filterBy.appendChild(option);
+                    categories.add(item.category);
+                }
+            });
+
+        controlsDiv.appendChild(filterBy);  
+    }
+
+    filterBy.addEventListener("change", function () 
+    {
+        let selected = filterBy.value;
+        let filteredItems;
+
+        if (selected === "lowStock")
+        {
+            filteredItems = item.filter(it => it.quantity < lowStockThreshold);
+        } 
+        else 
+        {
+            filteredItems = item.filter(it => it.category === selected);
+        }   
+        displayInventory(filteredItems);
+    });
+
 }
 
 function deleteItem() {
-    let dropdown = document.createElement("select");
+    let dropdown = document.getElementById("itemDropdown");
+    let deleteButton = document.getElementById("deleteButton");
 
-    if (!document.getElementById("itemDropdown") && item.length > 0) {
-        // Prevents creation of additional dropdowns and doesn't create if no items
+    UIhelper.controlsDivclear();
+
+    let errorCheck = UIhelper.errorChecking(dropdown, deleteButton);
+
+    if (errorCheck) 
+    {
+        dropdown = document.createElement("select");
         dropdown.id = "itemDropdown";
-        item.forEach((item) => {
+        item.forEach((item) => 
+        {
             let option = document.createElement("option");
             option.value = item.name;
             option.text = item.name;
             dropdown.append(option);
         });
         controlsDiv.appendChild(dropdown);
-    } else {
-        document.getElementById("itemDropdown").remove();
-    }
 
-    let deleteButton = document.createElement("button");
-
-    if (!document.getElementById("deleteButton") && item.length > 0) {
-        // Prevents creation of additional delete buttons
+        deleteButton = document.createElement("button");
         deleteButton.id = "deleteButton";
         deleteButton.textContent = "Delete Selected Item";
-        controlsDiv.appendChild(deleteButton);
+        controlsDiv.appendChild(deleteButton)
+    }
 
-        deleteButton.onclick = function() {
-            let yesButton = document.createElement("button");
-            let noButton = document.createElement("button");
-            yesButton.textContent = "Yes";
-            noButton.textContent = "No";
+    deleteButton.onclick = function() 
+    {
+        let yesButton = document.createElement("button");
+        let noButton = document.createElement("button");
+        yesButton.textContent = "Yes";
+        noButton.textContent = "No";
 
-            controlsDiv.appendChild(yesButton);
-            controlsDiv.appendChild(noButton);
+        controlsDiv.appendChild(yesButton);
+        controlsDiv.appendChild(noButton);
 
-            yesButton.onclick = function() {
-                let selectedItem = document.getElementById("itemDropdown").value;
-                item = item.filter((item) => item.name !== selectedItem);
-                controlsDiv.removeChild(dropdown);
-                controlsDiv.removeChild(deleteButton);
-                controlsDiv.removeChild(yesButton);
-                controlsDiv.removeChild(noButton);
-                displayInventory(item);
-            }
-
-            noButton.onclick = function() {
-                controlsDiv.removeChild(yesButton);
-                controlsDiv.removeChild(noButton);
-            }
+        yesButton.onclick = function() 
+        {
+            let selectedItem = document.getElementById("itemDropdown").value;
+            item = item.filter((item) => item.name !== selectedItem);
+            controlsDiv.removeChild(dropdown);
+            controlsDiv.removeChild(deleteButton);
+            controlsDiv.removeChild(yesButton);
+            controlsDiv.removeChild(noButton);
+            displayInventory(item);
         }
-    } else {
-        document.getElementById("deleteButton").remove();
+
+        noButton.onclick = function() 
+        {
+            controlsDiv.removeChild(yesButton);
+            controlsDiv.removeChild(noButton);
+        }
     }
 }
 
-function sortBy(item) {
-    let sortByOptions = document.createElement("select");
-    let ascendingButton = document.createElement("button");
-    let descendingButton = document.createElement("button");
+function sortBy() 
+{
+    UIhelper.controlsDivclear();
+    
+    let sortByOptions = document.getElementById("sortByOptions");
+    let ascendingButton = document.getElementById("ascendingButton");
+    let descendingButton = document.getElementById("descendingButton");
 
-    if (!document.getElementById("sortByOptions") || !document.getElementById("ascendingButton") || !document.getElementById("descendingButton")) {
+    let errorCheck = UIhelper.errorChecking(sortByOptions, ascendingButton, descendingButton);
+
+    if (errorCheck) 
+    {
         // Prevents creation of additional dropdowns
+        sortByOptions = document.createElement("select");
         sortByOptions.id = "sortByOptions";
         let fields = ["name", "code", "quantity", "category"];
-        fields.forEach(field => {
+        fields.forEach(field => 
+        {
             let option = document.createElement("option");
             option.value = field;
             option.text = "Sort by " + field;
@@ -246,85 +312,168 @@ function sortBy(item) {
 
         controlsDiv.appendChild(sortByOptions);
 
+        ascendingButton = document.createElement("button");
         ascendingButton.textContent = "Ascending";
-            ascendingButton.id = "ascendingButton";
-            controlsDiv.appendChild(ascendingButton);
+        ascendingButton.id = "ascendingButton";
+        controlsDiv.appendChild(ascendingButton);
 
-            descendingButton.textContent = "Descending";
-            descendingButton.id = "descendingButton";
-            controlsDiv.appendChild(descendingButton);
-
-        ascendingButton.onclick = function() { ascending = true; sort(sortByOptions.value, ascending); }
-        descendingButton.onclick = function() { ascending = false; sort(sortByOptions.value, ascending); }
-    } else {
-        document.getElementById("sortByOptions").remove();
-        document.getElementById("ascendingButton").remove();
-        document.getElementById("descendingButton").remove();
+        descendingButton = document.createElement("button");
+        descendingButton.textContent = "Descending";
+        descendingButton.id = "descendingButton";
+        controlsDiv.appendChild(descendingButton);
     }
+
+    ascendingButton.onclick = function() { ascending = true; sort(sortByOptions.value, ascending); }
+    descendingButton.onclick = function() { ascending = false; sort(sortByOptions.value, ascending); }
 }
 
-function reset() {
-    document.getElementById("list").innerHTML = ""; //dagdag mo controls div
+function reset() 
+{
+    document.getElementById("controls").innerHTML = "";
     displayInventory(item);
 }
 
-function displayInventory(list) {
-    let inventoryDiv = document.getElementById("list");
-    inventoryDiv.innerHTML = ""; // Clear previous content
+function search() {
+    let liveSearch = document.getElementById("liveSearch");
+    let searchButton = document.getElementById("searchButton");
+    let dropdown = document.getElementById("searchDropdown");
 
-    if (item.length === 0) {
-        inventoryDiv.innerHTML = "<p>No items in inventory.</p>";
-        return;
+    if (!liveSearch)
+    {
+        // Prevent multiple creations
+        liveSearch = document.createElement("input");
+        liveSearch.id = "liveSearch";
+        liveSearch.type = "text";
+        liveSearch.placeholder = "Enter item name";
+        document.body.appendChild(liveSearch);
     }
 
-    let html = "<ul>";
-    list.forEach((listItem) => {
-        html += `<li>${listItem.name} - ${listItem.code} - Quantity: ${listItem.quantity}</li>`;
-    });
-    html += "</ul>";
-
-    inventoryDiv.innerHTML = html;
-}
-
-function search() {
-    let searchTerm = document.createElement("input");
-    let searchButton = document.createElement("button");
-
-    if (!document.getElementById("searchTerm") && !document.getElementById("searchButton")) {
-        // Prevents creation of additional search inputs
-        searchTerm.id = "searchTerm";
-        searchTerm.type = "text";
-        searchTerm.placeholder = "Enter item name";
-        controlsDiv.appendChild(searchTerm);
-
+    if (!searchButton)
+    {
+        searchButton = document.createElement("button");
         searchButton.id = "searchButton";
         searchButton.textContent = "Search";
-        controlsDiv.appendChild(searchButton);
-
-        searchButton.onclick = function () {
-            let dropdown = document.getElementById("searchDropdown");
-            if (!dropdown) {
-                dropdown = document.createElement("select");
-                dropdown.id = "searchDropdown";
-                controlsDiv.appendChild(dropdown);
-            }
-
-            let term = searchTerm.value;
-            let results = item.filter((item) => item.name.includes(term));
-
-            let html = "<ul>";
-            results.forEach(match => { html += `<li>${match.name} — Quantity: ${match.quantity}</li>`; });
-            html += "</ul>";
-            document.getElementById("list").innerHTML = html;
-
-            results.forEach(match => {
-                let option = document.createElement("option");
-                option.value = match.name;
-                option.text = match.name;
-                dropdown.append(option);
-            });
-        };
-    } else {
-        document.getElementById("searchTerm").remove();
+        document.appendChild(searchButton);
     }
+
+    // Create dropdown (always appended once)
+    dropdown = document.createElement("select");
+    dropdown.id = "searchDropdown";
+    dropdown.style.display = "none"; // start hidden
+    controlsDiv.appendChild(dropdown);
+
+    // 🔍 Live search event
+    liveSearch.addEventListener("input", function () 
+    {
+        let term = liveSearch.value.trim().toLowerCase();
+        dropdown.innerHTML = ""; // clear old options
+
+        if (term === "") 
+        {
+            document.getElementById("list").innerHTML = "";
+            dropdown.style.display = "none";
+            return;
+        }
+
+        let results = item.filter((it) => it.name.includes(term));
+
+        if (results.length === 0) 
+        {
+            dropdown.style.display = "none";
+            return;
+        }
+
+        // Populate dropdown
+        results.forEach(match => 
+        {
+            let option = document.createElement("option");
+            option.value = match.name;
+            option.text = `${match.name} — Qty: ${match.quantity}`;
+            dropdown.appendChild(option);
+        });
+
+        // Make dropdown visible
+        dropdown.style.display = "block";
+
+        // Optional: show preview below
+        displayInventory(results);
+    });
+
+    // 🔘 Button manual search
+    searchButton.onclick = function () 
+    {
+        let term = liveSearch.value.trim().toLowerCase();
+        let results = item.filter((it) => it.name.includes(term));
+        displayInventory(results);
+    };
+
+    // ✅ Bonus: clicking an option auto-filters
+    dropdown.addEventListener("change", function () {
+        let selectedName = dropdown.value;
+        let selectedItem = item.find(it => it.name === selectedName);
+        if (selectedItem) displayInventory([selectedItem]);
+    });
+}
+
+window.onload = function() {search();};
+
+let tableView = true; // start in table view mode
+
+function toggleView() {
+  tableView = !tableView; // flip mode
+  const toggleBtn = document.getElementById("toggleView");
+  toggleBtn.value = tableView ? "Switch to Card View" : "Switch to Table View";
+
+  displayInventory(item); // re-render using the chosen mode
+}
+
+// Modify your existing displayInventory() to support both
+function displayInventory(items) {
+  const list = document.getElementById("list");
+
+  if (items.length === 0) {
+    list.innerHTML = "<i>No items found.</i>";
+    return;
+  }
+
+  if (tableView) {
+    // 🧾 Table View
+    let html = `
+      <table border="1" cellspacing="0" cellpadding="6">
+        <tr>
+          <th>Name</th>
+          <th>Code</th>
+          <th>Quantity</th>
+          <th>Category</th>
+        </tr>
+    `;
+    items.forEach(p => {
+      html += `
+        <tr>
+          <td>${p.name}</td>
+          <td>${p.code}</td>
+          <td>${p.quantity}</td>
+          <td>${p.category}</td>
+        </tr>
+      `;
+    });
+    html += `</table>`;
+    list.innerHTML = html;
+
+  } else {
+    // 🗂️ Card View
+    let html = `<div style="display:flex; flex-wrap:wrap; gap:10px;">`;
+    items.forEach(p => {
+      html += `
+        <div style="border:1px solid #888; padding:10px; border-radius:10px; width:150px;">
+          <b>${p.name}</b><br>
+          <small>Code: ${p.code}</small><br>
+          Qty: ${p.quantity}<br>
+          <i>${p.category}</i>
+        </div>
+      `;
+    });
+    html += `</div>`;
+    list.innerHTML = html;
+  }
 }
