@@ -2,13 +2,12 @@
 <html lang="en">
     <head>
     <h2>Product Inventory IS</h2>
-    <body>
-        <script src="app.js"></script>
-        
+    <body>        
         <form id="inventoryForm">
             Item: <input type="text" id="item" name="item"><br><br>
             Item Code: <input type="text" id="itemCode" name="itemCode"><br><br>
             Quantity: <input type="number" id="quantity" name="quantity"><br><br>
+            Category: <input type="text" id="category" name="category"><br><br>
         </form>
 
         <input type="button" onclick="addToInventory()" id="submit" value="Add to Inventory">
@@ -16,11 +15,14 @@
         <input type="button" onclick="deleteItem()" id="delete" value="Delete Item">
         <input type="button" onclick="sortBy()" id="sort" value="Sort Inventory">
         <input type="button" onclick="reset()" id="reset" value="Reset Inventory">
-        <input type="button" onclick="displayInventory()" id="display" value="Display Inventory">
 
+        <div id="controls"></div>
+        
         <div id="list"></div>
 
         <div id="summary"></div>
+
+        <script src="app.js"></script>
     </body>
     </head>
 </html>
