@@ -4,10 +4,10 @@
         <h2>Product Inventory IS</h2>
     <body>        
         <form id="inventoryForm">
-            Item: <input type="text" id="item" name="item"><br><br>
-            Item Code: <input type="text" id="itemCode" name="itemCode"><br><br>
-            Quantity: <input type="number" id="quantity" name="quantity"><br><br>
-            Category: <input type="text" id="category" name="category"><br><br>
+            Item: <input type="text" placeholder="Enter item name" id="item" name="item"><br><br>
+            Item Code: <input type="text" placeholder="Enter item code" id="itemCode" name="itemCode"><br><br>
+            Quantity: <input type="number" placeholder="Enter quantity" id="quantity" name="quantity"><br><br>
+            Category: <input type="text" placeholder="Enter category" id="category" name="category"><br><br>
         </form>
 
         <input type="button" onclick="addToInventory()" id="submit" value="Add to Inventory">
@@ -16,7 +16,7 @@
         <input type="button" onclick="deleteItem()" id="delete" value="Delete Item">
         <input type="button" onclick="sortBy()" id="sort" value="Sort Inventory">
         <input type="button" onclick="reset()" id="reset" value="Reset View">
-        <input type="text" id="liveSearch" placeholder="🔍 Search items... (Case Sensitive)" style="margin-left:10px;">
+        <input type="text" id="liveSearch" placeholder="🔍 Search items... (Case Sensitive)" style="margin-left:10px; width:215px;">
         <input type="button" id="searchButton" value="Search">
         <input type="button" onclick="toggleView()" id="toggleView" value="Switch to Card View" style="margin-left:10px;">
 
