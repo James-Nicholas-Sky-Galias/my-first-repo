@@ -36,7 +36,10 @@ let product =
     category: "",
     lowStockAlert: function()
     {
-        alert("Low stock for item: " + this.name);
+        if (this.quantity < lowStockThreshold)
+        {
+            alert("Low stock for item: " + this.name);
+        }
     }
 }
 
@@ -104,7 +107,7 @@ function addToInventory()
     //add to inventory array
     item[i] = newProduct;
     i++;
-    console.log(item[i-1]);
+    console.log("New item added: ", item[i-1]);
     displayInventory(item);
 }
 
@@ -191,6 +194,7 @@ function editItem()
                     itemToEdit[selectedField] = newValue;
                 }
                 displayInventory(item);
+                console.log("Item updated. New value: ", itemToEdit);
             };
         }
         else
@@ -259,6 +263,7 @@ function filter()
             filteredItems = item.filter(it => it.category === selected);
         }   
         displayInventory(filteredItems);
+        console.log("Filtered items by: ", selected);
     });
 
 }
@@ -324,6 +329,7 @@ function deleteItem()
     }
 
     displayInventory(item);
+    console.log("Item deleted. Current inventory: ", item);
 }
 
 function sortBy() 
@@ -365,8 +371,8 @@ function sortBy()
         controlsDiv.appendChild(descendingButton);
     }
 
-    ascendingButton.onclick = function() { ascending = true; sort(sortByOptions.value, ascending); } //sets ascending to true to sort in ascending order
-    descendingButton.onclick = function() { ascending = false; sort(sortByOptions.value, ascending); } //sets ascending to false to sort in descending order
+    ascendingButton.onclick = function() { ascending = true; sort(sortByOptions.value, ascending); console.log("Sorting by: ", sortByOptions.value, " in ascending order"); } //sets ascending to true to sort in ascending order
+    descendingButton.onclick = function() { ascending = false; sort(sortByOptions.value, ascending); console.log("Sorting by: ", sortByOptions.value, " in descending order"); } //sets ascending to false to sort in descending order
 }
 
 function reset() 
@@ -374,6 +380,7 @@ function reset()
     //clears controls div and displays full inventory
     document.getElementById("controls").innerHTML = "";
     displayInventory(item);
+    console.log("Controls reset. Full inventory displayed.");
 }
 
 function search() {
@@ -432,6 +439,7 @@ function search() {
 
         //displays as table or cards based on current mode, also shows live updates results
         displayInventory(results);
+        console.log("Live search for: ", term, ". Matches found: ", results.length);
     });
 
     //button manual search if some reason user prefers that
@@ -449,6 +457,7 @@ function toggleView() {
   toggleBtn.value = tableView ? "Switch to Card View" : "Switch to Table View"; //switches button text
 
   displayInventory(item); // re-render using the chosen mode
+  console.log("View toggled. Current mode: ", tableView ? "Table View" : "Card View");
 }
 
 function updateSummary() 
@@ -470,6 +479,9 @@ function updateSummary()
       <p>Total Quantity: ${totalQuantity}</p>
       <p>Low Stock Items: ${LowStockNames}</p>
     `;
+
+    product.lowStockAlert(); //alerts if any item is low stock
+    console.log("Summary updated. Total items: ", totalItems, ", Total quantity: ", totalQuantity, ", Low stock items: ", LowStockNames);
 }
 
 function displayInventory(items) 
@@ -541,14 +553,13 @@ function displayInventory(items)
     updateSummary();
 }
 
-window.onload = function() {search();};
+window.onload = function() {search();}; //initialize live search on page load
 
 let tableView = true; // start in table view mode
 
-for (i = 0; i < item.length; i++)
-{
-    if (item[i].quantity < lowStockThreshold)
-    {
-        item[i].lowStockAlert();
-    }
-}
+//Additional notes:
+//- Efficiency isn't optimized for very large inventories, but fine for typical small business use.
+//- I think the least efficient is O(n log n) due to sorting, but most operations are O(n) or better.
+//- The UI is kept simple and functional, focusing on usability over aesthetics.
+//- Most of the code could probably be rewritten to be more readable, but I have not yet explored how to do so.
+//Overall, this program is very rudimentary and can do with many more features and improvements.
