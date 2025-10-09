@@ -36,9 +36,11 @@ let product =
     category: "",
     lowStockAlert: function()
     {
-        if (this.quantity < lowStockThreshold)
+        if (this.quantity < lowStockThreshold && !this.alerted)
         {
             alert("Low stock for item: " + this.name);
+            console.log("Low stock alert for item: ", this.name);
+            this.alerted = true; // set alerted flag to true
         }
     }
 }
@@ -470,17 +472,17 @@ function updateSummary()
     }
     let lowStockItems = [];
     lowStockItems = item.filter(it => it.quantity < lowStockThreshold); //filters low stock items into new array
-    LowStockNames = lowStockItems.map(it => it.name).join(", "); //isolates names of low stock items and joins them into a string
+    LowStockNames = lowStockItems.map(it => it.name).join("<br>- "); //isolates names of low stock items and joins them into a string
     
     //updates summary div
     summary.innerHTML = `
       <h3>Inventory Summary</h3>
       <p>Total Items: ${totalItems}</p>
       <p>Total Quantity: ${totalQuantity}</p>
-      <p>Low Stock Items: ${LowStockNames}</p>
+      <p>Low Stock Items:<br>- ${LowStockNames}</p>
     `;
 
-    product.lowStockAlert(); //alerts if any item is low stock
+    item.forEach(it => it.lowStockAlert()); //alerts if any item is low stock
     console.log("Summary updated. Total items: ", totalItems, ", Total quantity: ", totalQuantity, ", Low stock items: ", LowStockNames);
 }
 
@@ -560,6 +562,6 @@ let tableView = true; // start in table view mode
 //Additional notes:
 //- Efficiency isn't optimized for very large inventories, but fine for typical small business use.
 //- I think the least efficient is O(n log n) due to sorting, but most operations are O(n) or better.
-//- The UI is kept simple and functional, focusing on usability over aesthetics.
+//- The UI is kept simple and functional, focusing on usability over aesthetics. I instructed ChatGPT to not use CSS
 //- Most of the code could probably be rewritten to be more readable, but I have not yet explored how to do so.
 //Overall, this program is very rudimentary and can do with many more features and improvements.

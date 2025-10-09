@@ -1,32 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <h2>Product Inventory IS</h2>
-    <body>        
-        <form id="inventoryForm">
-            Item: <input type="text" placeholder="Enter item name" id="item" name="item"><br><br>
-            Item Code: <input type="text" placeholder="Enter item code" id="itemCode" name="itemCode"><br><br>
-            Quantity: <input type="number" placeholder="Enter quantity" id="quantity" name="quantity"><br><br>
-            Category: <input type="text" placeholder="Enter category" id="category" name="category"><br><br>
-        </form>
+  <head>
+    <meta charset="UTF-8">
+    <title>Product Inventory System</title>
+  </head>
+  <body bgcolor="#f8f8f8" text="#222" style="font-family: Arial, sans-serif;">
+    <center>
+      <h2>🧾 Product Inventory System</h2>
+    </center>
 
-        <input type="button" onclick="addToInventory()" id="submit" value="Add to Inventory">
-        <input type="button" onclick="editItem()" id="edit" value="Edit Item">
-        <input type="button" onclick="filter()" id="filter" value="Filter Inventory">
-        <input type="button" onclick="deleteItem()" id="delete" value="Delete Item">
-        <input type="button" onclick="sortBy()" id="sort" value="Sort Inventory">
-        <input type="button" onclick="reset()" id="reset" value="Reset View">
-        <input type="text" id="liveSearch" placeholder="🔍 Search items... (Case Sensitive)" style="margin-left:10px; width:215px;">
-        <input type="button" id="searchButton" value="Search">
-        <input type="button" onclick="toggleView()" id="toggleView" value="Switch to Card View" style="margin-left:10px;">
+    <table border="1" cellpadding="10" cellspacing="0" width="60%" align="center" bgcolor="white">
+      <tr>
+        <th colspan="2" bgcolor="#e0e0e0">Item Details</th>
+      </tr>
+      <tr>
+        <td align="right"><b>Item Name:</b></td>
+        <td><input type="text" id="item" name="item" placeholder="Enter item name" size="40"></td>
+      </tr>
+      <tr>
+        <td align="right"><b>Item Code:</b></td>
+        <td><input type="text" id="itemCode" name="itemCode" placeholder="Enter item code" size="40"></td>
+      </tr>
+      <tr>
+        <td align="right"><b>Quantity:</b></td>
+        <td><input type="number" id="quantity" name="quantity" placeholder="Enter quantity" size="40"></td>
+      </tr>
+      <tr>
+        <td align="right"><b>Category:</b></td>
+        <td><input type="text" id="category" name="category" placeholder="Enter category" size="40"></td>
+      </tr>
+    </table>
 
-        <div id="controls"></div>
-        
-        <div id="list"></div>
+    <br>
 
-        <div id="summary"></div>
+    <table border="1" cellpadding="10" cellspacing="0" width="60%" align="center" bgcolor="white">
+      <tr>
+        <th colspan="2" bgcolor="#e0e0e0">Inventory Controls</th>
+      </tr>
+      <tr>
+        <td colspan="2" align="center">
+          <input type="button" id="submit" value="Add to Inventory" onclick="addToInventory()">
+          <input type="button" id="edit" value="Edit Item" onclick="editItem()">
+          <input type="button" id="filter" value="Filter Inventory" onclick="filter()">
+          <input type="button" id="delete" value="Delete Item" onclick="deleteItem()">
+          <input type="button" id="sort" value="Sort Inventory" onclick="sortBy()">
+          <input type="button" id="reset" value="Reset View" onclick="reset()">
+          <input type="button" id="toggleView" value="Switch to Card View" onclick="toggleView()">
+        </td>
+      </tr>
+      <tr>
+        <td align="right"><b>Search:</b></td>
+        <td>
+          <input type="text" id="liveSearch" placeholder="🔍 Search items... (Case Sensitive)" size="40">
+          <input type="button" id="searchButton" value="Search">
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" id="controls"></td>
+      </tr>
+    </table>
 
-        <script src="app.js"></script>
-    </body>
-    </head>
+    <br>
+
+    <table border="1" cellpadding="10" cellspacing="0" width="60%" align="center" bgcolor="white">
+      <tr>
+        <th bgcolor="#e0e0e0">Inventory Display</th>
+      </tr>
+      <tr>
+        <td>
+          <div id="list"></div>
+          <div id="summary"></div>
+        </td>
+      </tr>
+    </table>
+
+    <br><br>
+
+    <script src="app.js"></script>
+  </body>
 </html>
