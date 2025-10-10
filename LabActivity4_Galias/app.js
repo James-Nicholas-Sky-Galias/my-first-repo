@@ -1,8 +1,10 @@
-let item = []; //product objects will be stored here
+var item = []; //product objects will be stored here
 let i = 0;
 const lowStockThreshold = 10; //arbitrary threshold for low stock
 let controlsDiv = document.getElementById("controls");
 let summary = document.getElementById("summary");
+
+let tableView = true; // start in table view mode
 
 //helper object for UI tasks
 let UIhelper = 
@@ -106,10 +108,16 @@ function addToInventory()
     newProduct.quantity = quantity;
     newProduct.category = category;
 
+    document.getElementById("item").value = ""; //clear input fields
+    document.getElementById("itemCode").value = "";
+    document.getElementById("quantity").value = "";
+    document.getElementById("category").value = "";
+
     //add to inventory array
     item[i] = newProduct;
     i++;
     console.log("New item added: ", item[i-1]);
+    updateSummary();
     displayInventory(item);
 }
 
@@ -187,6 +195,12 @@ function editItem()
                     return;
                 }
 
+                if (selectedField === "name" && item.some(it => it.name === newValue) || (selectedField === "code" && item.some(it => it.code === newValue))) //error checking for duplicate names
+                {
+                    alert("Duplicate value found.");
+                    return;
+                }
+
                 if (selectedField === "quantity") //applies new value to existing item
                 {
                     itemToEdit[selectedField] = parseInt(newValue); //changes int in string to int
@@ -195,8 +209,13 @@ function editItem()
                 {
                     itemToEdit[selectedField] = newValue;
                 }
+                updateSummary();
                 displayInventory(item);
                 console.log("Item updated. New value: ", itemToEdit);
+
+                controlsDiv.removeChild(selection);
+                controlsDiv.removeChild(newValueInput);
+                controlsDiv.removeChild(updateButton);
             };
         }
         else
@@ -234,10 +253,10 @@ function filter()
         lowStockOption.value = "lowStock";
         lowStockOption.text = "Low Stock Items";
         filterBy.appendChild(lowStockOption);
-        
+
         //dynamically add categories from existing items
         item.forEach((item) => 
-            {
+            {   
                 if (item.category && !categories.has(item.category))
                 {
                     let option = document.createElement("option");
@@ -256,7 +275,11 @@ function filter()
         let selected = filterBy.value;
         let filteredItems;
 
-        if (selected === "lowStock") //hardcoded low stock option
+        if (selected === "") //default option, show all items
+        {
+            filteredItems = item;
+        }
+        else if (selected === "lowStock") //hardcoded low stock option
         {
             filteredItems = item.filter(it => it.quantity < lowStockThreshold);
         } 
@@ -314,11 +337,17 @@ function deleteItem()
         yesButton.onclick = function() 
         {
             let selectedItem = document.getElementById("itemDropdown").value;
-            item = item.filter((item) => item.name !== selectedItem);
+            let index = item.findIndex(it => it.name === selectedItem);
+            if (index !== -1) 
+            {
+                item.splice(index, 1); // removes the actual element from the global array
+            }
+            i = item.length; //update index tracker
             controlsDiv.removeChild(dropdown);
             controlsDiv.removeChild(deleteButton);
             controlsDiv.removeChild(yesButton);
             controlsDiv.removeChild(noButton);
+            updateSummary();
             displayInventory(item);
         }
 
@@ -330,7 +359,6 @@ function deleteItem()
         }
     }
 
-    displayInventory(item);
     console.log("Item deleted. Current inventory: ", item);
 }
 
@@ -484,6 +512,7 @@ function updateSummary()
 
     item.forEach(it => it.lowStockAlert()); //alerts if any item is low stock
     console.log("Summary updated. Total items: ", totalItems, ", Total quantity: ", totalQuantity, ", Low stock items: ", LowStockNames);
+    console.log("Current inventory: ", item);
 }
 
 function displayInventory(items) 
@@ -555,9 +584,9 @@ function displayInventory(items)
     updateSummary();
 }
 
-window.onload = function() {search();}; //initialize live search on page load
+displayInventory(item); //initial display
 
-let tableView = true; // start in table view mode
+window.onload = function() {search();}; //initialize live search on page load
 
 //Additional notes:
 //- Efficiency isn't optimized for very large inventories, but fine for typical small business use.
